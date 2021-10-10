@@ -2921,7 +2921,7 @@ var ThreadWidget = Widget.extend({
             hasMessageAttachmentDeletable: false,
         };
         this._selectedMessageID = null;
-        this._currentThreadID = null;
+        this._current_threadID = null;
         this._messageMailPopover = null;
         this._messageSeenPopover = null;
         // used to track popover IDs to destroy on re-rendering of popovers
@@ -2962,10 +2962,10 @@ var ThreadWidget = Widget.extend({
         var self = this;
 
         var shouldScrollToBottomAfterRendering = false;
-        if (this._currentThreadID === thread.getID() && this.isAtBottom()) {
+        if (this._current_threadID === thread.getID() && this.isAtBottom()) {
             shouldScrollToBottomAfterRendering = true;
         }
-        this._currentThreadID = thread.getID();
+        this._current_threadID = thread.getID();
 
         // copy so that reverse do not alter order in the thread object
         var messages = _.clone(thread.getMessages({ domain: options.domain || [] }));
@@ -3095,12 +3095,12 @@ var ThreadWidget = Widget.extend({
      */
     removeMessageAndRender: function (messageID, thread, options) {
         var self = this;
-        this._currentThreadID = thread.getID();
+        this._current_threadID = thread.getID();
         return new Promise(function (resolve, reject) {
             self.$('.o_thread_message[data-message-id="' + messageID + '"]')
             .fadeOut({
                 done: function () {
-                    if (self._currentThreadID === thread.getID()) {
+                    if (self._current_threadID === thread.getID()) {
                         self.render(thread, options);
                     }
                     resolve();
