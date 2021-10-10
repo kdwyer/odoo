@@ -28,6 +28,7 @@ import threading
 import time
 import unittest
 from collections import defaultdict
+from collections.abc import Sequence
 from contextlib import contextmanager
 from datetime import datetime, date
 from itertools import zip_longest as izip_longest
@@ -2341,7 +2342,7 @@ class O2MProxy(X2MProxy):
         del self._records[index]
         self._parent._perform_onchange([self._field])
 
-class M2MProxy(X2MProxy, collections.Sequence):
+class M2MProxy(X2MProxy, Sequence):
     """ M2MProxy()
 
     Behaves as a :class:`~collection.Sequence` of recordsets, can be

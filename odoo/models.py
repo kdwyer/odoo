@@ -35,7 +35,7 @@ import pytz
 import re
 import uuid
 from collections import defaultdict, OrderedDict
-from collections.abc import MutableMapping
+from collections.abc import MutableMapping, Sequence, Set
 from contextlib import closing
 from inspect import getmembers, currentframe
 from operator import attrgetter, itemgetter
@@ -6369,9 +6369,9 @@ Fields:
         return self.concat(*records_batches)
 
 
-collections.Set.register(BaseModel)
+Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have __reversed__, index or count
-collections.Sequence.register(BaseModel)
+Sequence.register(BaseModel)
 
 class RecordCache(MutableMapping):
     """ A mapping from field names to values, to read and update the cache of a record. """
