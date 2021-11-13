@@ -11,6 +11,8 @@ import itertools
 import logging
 import base64
 import binascii
+import functools
+import json
 import pytz
 import psycopg2
 
@@ -1942,6 +1944,53 @@ class Datetime(Field):
     def convert_to_display_name(self, value, record):
         assert record, 'Record expected'
         return Datetime.to_string(Datetime.context_timestamp(record, Datetime.from_string(value)))
+
+
+class JSONB(Field):
+    """Minimal JSONB field.
+
+    Not integrated with the query engine.
+
+    TODOs
+    - handle decimals?
+    - override / extend `default`?
+    """
+
+    column_type = ('jsonb', 'jsonb')
+    type = 'jsonb'
+
+    def default(o):
+        if isinstance(o, (date, datetime)):
+            return str(o)
+        raise TypeError(f'Object of type {type(o)!r} is not JSON serializable')
+
+    dumps = functools.partial(json.dumps, default=default)
+
+    def convert_to_column(self, value, record, values=None, validate=True):
+        """ Convert ``value`` from the ``write`` format to the SQL format. """
+        if value is None or value is False:
+            return None
+        return psycopg2.extras.Json(value, dumps=self.dumps)
+
+    # By default nulls (`None`) are converted to `False`, but we don't want that because then the value won't
+    # round-trip correctly.  To prevent this behaviour we override the conversion methods for read and record.
+
+    def convert_to_record(self, value, record):
+        """ Convert ``value`` from the cache format to the record format.
+        If the value represents a recordset, it should share the prefetching of
+        ``record``.
+        """
+        return value
+
+    def convert_to_read(self, value, record, use_name_get=True):
+        """ Convert ``value`` from the record format to the format returned by
+        method :meth:`BaseModel.read`.
+
+        :param bool use_name_get: when True, the value's display name will be
+            computed using :meth:`BaseModel.name_get`, if relevant for the field
+        """
+        return value
+
 
 # http://initd.org/psycopg/docs/usage.html#binary-adaptation
 # Received data is returned as buffer (in Python 2) or memoryview (in Python 3).
